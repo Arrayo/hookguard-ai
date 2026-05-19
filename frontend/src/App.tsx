@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react'
-import { AlertTriangle, Clipboard, Loader2, Radar, ShieldCheck, Sparkles } from 'lucide-react'
+import { AlertTriangle, Clipboard, ClipboardPaste, Loader2, Radar, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,7 @@ import type { ReviewResponse } from '@/types/review'
 const demoExamples = [
   {
     label: 'Infinite loop',
+    short: 'Loop',
     description: 'Effect updates its own dependency',
     code: `import { useEffect, useState } from 'react'
 
@@ -31,6 +32,7 @@ export function UserPanel({ userId }: { userId: string }) {
   },
   {
     label: 'Unstable deps',
+    short: 'Unstable',
     description: 'Object dependency recreated per render',
     code: `import { useEffect, useState } from 'react'
 
@@ -49,6 +51,7 @@ export function SearchResults({ query }: { query: string }) {
   },
   {
     label: 'Random keys',
+    short: 'Keys',
     description: 'Keys remount stateful children',
     code: `type Todo = { id: string; title: string; done: boolean }
 
@@ -67,6 +70,7 @@ export function TodoList({ todos }: { todos: Todo[] }) {
   },
   {
     label: 'Derived state',
+    short: 'Derived',
     description: 'Stores values that can be computed',
     code: `import { useEffect, useState } from 'react'
 
@@ -86,12 +90,19 @@ export function ActiveItems({ items }: { items: Item[] }) {
 
 const sampleCode = demoExamples[0].code
 
+const reviewPillars = ['Hooks', 'Loops', 'Design']
+
 function App() {
   const [code, setCode] = useState(sampleCode)
   const [review, setReview] = useState<ReviewResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const activeDemo = demoExamples.find((example) => example.code === code)
+  const filename = (() => {
+    const match = code.match(/export\s+(?:default\s+)?function\s+([A-Z]\w+)/)
+    if (!match?.[1]) return 'component.tsx'
+    return match[1].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() + '.tsx'
+  })()
 
   async function handleAnalyze() {
     setError(null)
@@ -112,89 +123,109 @@ function App() {
     void navigator.clipboard.writeText(JSON.stringify(review, null, 2))
   }
 
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (text.trim()) setCode(text)
+    } catch {
+      // Clipboard access denied — user needs to paste manually
+    }
+  }
+
   return (
     <main className="min-h-screen px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-2xl shadow-black/30 backdrop-blur lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-sm text-cyan-100">
-              <ShieldCheck className="h-4 w-4" />
-              Local Gemma reviews through Ollama
-            </div>
-            <div className="space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-6xl">
-                Production-grade React review, locally.
-              </h1>
-              <p className="max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                Paste a component or load a demo to surface hook bugs, rerender causes, and minimal
-                refactors with a senior frontend lens.
-              </p>
+        <header className="flex flex-col gap-4 rounded-2xl border border-white/15 bg-gradient-to-r from-white/8 to-white/5 px-5 py-4 shadow-xl shadow-black/40 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="HookGuard AI" className="h-9 w-9 rounded-xl" />
+            <div>
+              <h1 className="text-xl font-semibold text-white">HookGuard AI</h1>
+              <p className="text-xs text-slate-400">Expert React review · Gemma · Ollama</p>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-center lg:min-w-80">
-            {['Hooks', 'Loops', 'Design'].map((item) => (
-              <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Review</p>
-                <p className="mt-1 font-semibold text-cyan-100">{item}</p>
+          <div className="flex gap-2">
+            {reviewPillars.map((label) => (
+              <div key={label} className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-center">
+                <p className="text-[10px] uppercase tracking-widest text-slate-500">Review</p>
+                <p className="text-xs font-semibold text-slate-300">{label}</p>
               </div>
             ))}
           </div>
         </header>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]">
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] xl:items-stretch">
           <Card className="overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-white/10">
-              <div>
-                <CardTitle>React Snippet</CardTitle>
-                <p className="text-sm text-slate-400">
-                  {activeDemo ? activeDemo.description : 'Paste your own TypeScript or JSX snippet.'}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 sm:items-end">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Demo cases</p>
-                <div className="flex flex-wrap justify-end gap-2 rounded-2xl border border-white/10 bg-slate-950/50 p-1.5">
-                {demoExamples.map((example) => (
-                  <Button
-                    key={example.label}
-                    variant={activeDemo?.label === example.label ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className={activeDemo?.label === example.label ? 'bg-cyan-300/12 text-cyan-100' : ''}
-                    onClick={() => setCode(example.code)}
-                    title={example.description}
-                  >
-                    {example.label}
-                  </Button>
-                ))}
+            {/* VS Code-style tab bar */}
+            <div className="flex items-center justify-between border-b border-white/10 bg-slate-950/70 px-3 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  <span className="h-3 w-3 rounded-full bg-red-400/50" />
+                  <span className="h-3 w-3 rounded-full bg-amber-400/50" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-400/50" />
                 </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void navigator.clipboard.writeText(code)}
-                >
-                  <Clipboard className="h-4 w-4" />
-                  Copy code
+                <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/6 px-2.5 py-1 text-xs text-slate-300">
+                  <span>{filename}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-600">Demos</span>
+                <div className="flex">
+                  {demoExamples.map((example) => {
+                    const isActive = activeDemo?.label === example.label
+                    return (
+                      <button
+                        key={example.label}
+                        className={`h-8 border-b-2 px-3 text-xs transition-colors ${isActive ? 'border-cyan-400 text-cyan-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+                        onClick={() => setCode(example.code)}
+                        title={example.description}
+                      >
+                        {example.short}
+                      </button>
+                    )
+                  })}
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-slate-200" onClick={() => setCode('')} title="Clear editor">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-slate-200" onClick={() => void handlePaste()} title="Paste from clipboard">
+                  <ClipboardPaste className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-slate-200" onClick={() => void navigator.clipboard.writeText(code)} title="Copy code">
+                  <Clipboard className="h-3.5 w-3.5" />
                 </Button>
               </div>
-            </CardHeader>
+            </div>
             <CardContent className="p-0">
-              <div className="h-[520px] overflow-hidden border-b border-white/10">
+              <div className="h-[540px] overflow-hidden">
                 <Editor
                   height="100%"
                   defaultLanguage="typescript"
                   theme="vs-dark"
                   value={code}
                   onChange={(value) => setCode(value ?? '')}
+                  beforeMount={(monaco) => {
+                    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+                      noSemanticValidation: true,
+                      noSyntaxValidation: true,
+                    })
+                    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                      noSemanticValidation: true,
+                      noSyntaxValidation: true,
+                    })
+                  }}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 14,
-                    padding: { top: 18, bottom: 18 },
+                    padding: { top: 16, bottom: 16 },
                     scrollBeyondLastLine: false,
                     wordWrap: 'on',
                   }}
                 />
               </div>
-              <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-slate-400">Local endpoint: POST /api/reviews/react</p>
+              <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/70 px-4 py-2">
+                <p className="text-xs text-slate-500">
+                  {code.trim().split('\n').length} lines
+                </p>
                 <Button onClick={handleAnalyze} disabled={isLoading || code.trim().length < 20}>
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -207,18 +238,18 @@ function App() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-white/10">
               <div>
                 <CardTitle>Review Results</CardTitle>
-                <p className="text-sm text-slate-400">Prioritized findings, fixes, and normalized scores.</p>
+                <p className="text-sm text-slate-400">Prioritized findings, fixes, and normalized scores</p>
               </div>
               <Button variant="ghost" size="sm" onClick={copyReview} disabled={!review}>
                 <Clipboard className="h-4 w-4" />
                 Copy JSON
               </Button>
             </CardHeader>
-            <CardContent className="pt-5">
+            <CardContent className="flex-1 pt-5">
               {isLoading ? <LoadingState /> : null}
               {error ? <ErrorState message={error} /> : null}
               {!isLoading && !error && review ? <ReviewPanels review={review} /> : null}
@@ -414,12 +445,14 @@ function FallbackNotice({ review }: { review: ReviewResponse }) {
 
 function EmptyState() {
   return (
-    <div className="grid min-h-[420px] place-items-center rounded-2xl border border-dashed border-white/10 bg-white/[0.03] p-8 text-center">
+    <div className="grid min-h-[420px] place-items-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
       <div className="max-w-sm space-y-3">
-        <Sparkles className="mx-auto h-10 w-10 text-cyan-200" />
-        <h2 className="text-xl font-semibold text-white">Load a demo or paste production code</h2>
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/8">
+          <Sparkles className="h-7 w-7 animate-pulse text-cyan-300" />
+        </div>
+        <h2 className="text-lg font-semibold text-white">Load a demo or paste your code</h2>
         <p className="text-sm leading-6 text-slate-400">
-          HookGuard will prioritize concrete React risks, then generate normalized scores and copy-ready fixes.
+          HookGuard surfaces concrete React risks and generates normalized scores with copy-ready fixes
         </p>
       </div>
     </div>
@@ -428,14 +461,24 @@ function EmptyState() {
 
 function LoadingState() {
   return (
-    <div className="grid min-h-[420px] place-items-center rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
-      <div className="space-y-3">
-        <Loader2 className="mx-auto h-10 w-10 animate-spin text-cyan-200" />
-        <h2 className="text-xl font-semibold text-white">Gemma is reviewing the snippet</h2>
-        <p className="text-sm text-slate-400">
-          Checking render loops, unstable references, architecture, and practical fixes.
-        </p>
+    <div className="space-y-4">
+      <div className="h-16 rounded-2xl border border-white/8 bg-white/[0.03] animate-shimmer" />
+      <div className="flex gap-2">
+        {[64, 76, 56].map((w) => (
+          <div key={w} className="h-9 rounded-lg bg-white/[0.04] animate-shimmer" style={{ width: w }} />
+        ))}
       </div>
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4 animate-shimmer">
+          <div className="flex gap-2">
+            <div className="h-5 w-16 rounded-full bg-white/8" />
+            <div className="h-5 w-20 rounded-full bg-white/6" />
+          </div>
+          <div className="h-3.5 w-3/4 rounded bg-white/8" />
+          <div className="h-3 w-full rounded bg-white/5" />
+          <div className="h-3 w-5/6 rounded bg-white/5" />
+        </div>
+      ))}
     </div>
   )
 }
