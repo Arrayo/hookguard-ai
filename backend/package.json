@@ -1,0 +1,33 @@
+{
+  "name": "hookguard-ai-backend",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.8.5",
+    "ollama": "^0.6.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.9.0",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.22.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.4"
+  }
+}
