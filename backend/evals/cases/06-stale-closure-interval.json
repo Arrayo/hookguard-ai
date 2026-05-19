@@ -1,0 +1,22 @@
+{
+  "id": "06-stale-closure-interval",
+  "name": "interval captures stale state",
+  "snippet": "06-stale-closure-interval.tsx",
+  "expectedCategory": "stale closures",
+  "expectedSeverity": "high",
+  "expectedIssueCategory": "hooks",
+  "requiredKeywords": ["stale", "seconds"],
+  "forbiddenKeywords": [
+    "critical",
+    "without a cleanup",
+    "cleanup is missing",
+    "creates an infinite loop",
+    "causing an infinite loop",
+    "potential infinite loop"
+  ],
+  "forbiddenRefactorKeywords": ["add a cleanup", "}, [seconds]", "remove the dependency array"],
+  "scoreRanges": {
+    "overall": { "min": 35, "max": 85 },
+    "hooks": { "max": 75 }
+  }
+}

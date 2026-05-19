@@ -1,0 +1,16 @@
+{
+  "id": "05-random-keys",
+  "name": "Math.random key remounts list items",
+  "snippet": "05-random-keys.tsx",
+  "expectedCategory": "random keys",
+  "expectedSeverity": "high",
+  "expectedIssueCategory": "performance",
+  "requiredKeywords": ["Math.random", "key"],
+  "forbiddenKeywords": ["infinite loop", "useEffect"],
+  "forbiddenRefactorKeywords": ["```", "style=", "className=", "<li key={Math.random()}"],
+  "scoreRanges": {
+    "overall": { "min": 40, "max": 85 },
+    "architecture": { "min": 70 },
+    "performance": { "max": 75 }
+  }
+}

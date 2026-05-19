@@ -7,6 +7,7 @@
     "dev": "concurrently -n backend,frontend -c cyan,magenta \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "build": "npm run build --prefix backend && npm run build --prefix frontend",
     "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+    "evals": "npm --prefix backend run evals --",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

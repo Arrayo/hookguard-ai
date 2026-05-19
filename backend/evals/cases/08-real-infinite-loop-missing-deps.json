@@ -1,0 +1,19 @@
+{
+  "id": "08-real-infinite-loop-missing-deps",
+  "name": "effect without dependency array updates state every render",
+  "snippet": "08-real-infinite-loop-missing-deps.tsx",
+  "expectedCategory": "real infinite loops",
+  "expectedSeverity": "critical",
+  "expectedIssueCategory": "hooks",
+  "requiredKeywords": ["dependency array", "setWidth", "width"],
+  "forbiddenKeywords": ["harmless", "stale closure", "ResizeObserver"],
+  "forbiddenRefactorKeywords": [
+    "ResizeObserver",
+    "remove the dependency array",
+    "// Remove the incrementing logic"
+  ],
+  "scoreRanges": {
+    "overall": { "max": 75 },
+    "hooks": { "max": 65 }
+  }
+}

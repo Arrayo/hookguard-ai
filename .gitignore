@@ -1,1 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE & editor
+.cursor/
+.vscode/
+.idea/
+
+# Agent tooling
+.agent/
 .devctx/
+
+# OS
+.DS_Store
+Thumbs.db

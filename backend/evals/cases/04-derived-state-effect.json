@@ -1,0 +1,27 @@
+{
+  "id": "04-derived-state-effect",
+  "name": "derived full name stored in state",
+  "snippet": "04-derived-state-effect.tsx",
+  "expectedCategory": "derived state",
+  "expectedSeverity": "medium",
+  "expectedIssueCategory": "maintainability",
+  "requiredKeywords": ["derived", "fullName"],
+  "forbiddenKeywords": ["infinite loop", "critical", "unstable dependency"],
+  "forbiddenRefactorKeywords": [
+    "setFullName(`${firstName} ${lastName}`); }, [firstName, lastName]",
+    "dependency array should only include firstName and lastName",
+    "updated to include only firstName and lastName",
+    "title=",
+    "style=",
+    "```",
+    "useEffect",
+    "useState",
+    "fullName = `${firstName} ${lastName}`;\n  }, []"
+  ],
+  "scoreRanges": {
+    "overall": { "min": 50, "max": 90 },
+    "maintainability": { "min": 50, "max": 85 },
+    "architecture": { "min": 70 },
+    "performance": { "min": 70 }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "02-unstable-object-dependency",
+  "name": "object literal used as effect dependency",
+  "snippet": "02-unstable-object-dependency.tsx",
+  "expectedCategory": "unstable dependencies",
+  "expectedSeverity": "high",
+  "expectedIssueCategory": "hooks",
+  "requiredKeywords": ["filters", "dependency"],
+  "forbiddenKeywords": ["remove the dependency array", "empty dependency array"],
+  "forbiddenRefactorKeywords": [".then", "res.json", "response.json"],
+  "scoreRanges": {
+    "overall": { "min": 35, "max": 75 },
+    "hooks": { "max": 75 },
+    "architecture": { "min": 70 },
+    "maintainability": { "min": 70 },
+    "performance": { "max": 85 }
+  }
+}

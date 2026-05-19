@@ -1,0 +1,13 @@
+{
+  "id": "09-stable-mount-effect",
+  "name": "safe mount-only state update",
+  "snippet": "09-stable-mount-effect.tsx",
+  "expectedCategory": "harmless rerenders",
+  "maxSeverity": "medium",
+  "requireCategoryEvidence": false,
+  "forbiddenKeywords": ["critical", "infinite loop", "render loop", "remove the dependency array"],
+  "scoreRanges": {
+    "overall": { "min": 65 },
+    "hooks": { "min": 65 }
+  }
+}

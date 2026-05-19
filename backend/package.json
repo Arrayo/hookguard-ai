@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint .",
+    "evals": "tsx evals/run.ts",
     "format": "prettier --write ."
   },
   "keywords": [],

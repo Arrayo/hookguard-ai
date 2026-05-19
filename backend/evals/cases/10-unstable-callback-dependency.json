@@ -1,0 +1,25 @@
+{
+  "id": "10-unstable-callback-dependency",
+  "name": "inline callback used as effect dependency",
+  "snippet": "10-unstable-callback-dependency.tsx",
+  "expectedCategory": "unstable dependencies",
+  "expectedSeverity": "high",
+  "expectedIssueCategory": "hooks",
+  "requiredKeywords": ["track", "dependency"],
+  "forbiddenKeywords": [
+    "remove the dependency array",
+    "empty dependency array",
+    "infinite loop",
+    "critical"
+  ],
+  "forbiddenRefactorKeywords": [
+    "Removed track from dependency array",
+    "Remove `track` from dependency array",
+    "}, []",
+    "// Removed track"
+  ],
+  "scoreRanges": {
+    "overall": { "min": 35, "max": 85 },
+    "hooks": { "max": 75 }
+  }
+}

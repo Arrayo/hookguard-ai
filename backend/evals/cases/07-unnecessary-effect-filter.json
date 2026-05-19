@@ -1,0 +1,17 @@
+{
+  "id": "07-unnecessary-effect-filter",
+  "name": "filter result stored via effect",
+  "snippet": "07-unnecessary-effect-filter.tsx",
+  "expectedCategory": "unnecessary effects",
+  "expectedSeverity": "medium",
+  "expectedIssueCategory": "maintainability",
+  "requiredKeywords": ["effect", "activeProducts"],
+  "forbiddenKeywords": ["infinite loop", "critical"],
+  "forbiddenRefactorKeywords": ["```", "useMemo", "useEffect", "useState", "setActiveProducts"],
+  "scoreRanges": {
+    "overall": { "min": 50, "max": 90 },
+    "maintainability": { "min": 50, "max": 85 },
+    "architecture": { "min": 70 },
+    "performance": { "min": 70 }
+  }
+}

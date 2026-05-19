@@ -1,0 +1,22 @@
+{
+  "id": "03-harmless-parent-rerender",
+  "name": "plain render-only component",
+  "snippet": "03-harmless-parent-rerender.tsx",
+  "expectedCategory": "harmless rerenders",
+  "expectedSeverity": "none",
+  "maxSeverity": "low",
+  "requireCategoryEvidence": false,
+  "forbiddenKeywords": [
+    "critical",
+    "infinite loop",
+    "render loop",
+    "maximum update depth",
+    "useEffect",
+    "dependency array",
+    "unstable dependency"
+  ],
+  "scoreRanges": {
+    "overall": { "min": 80 },
+    "hooks": { "min": 80 }
+  }
+}

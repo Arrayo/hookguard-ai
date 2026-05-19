@@ -11,7 +11,7 @@ export const analyzeCodeRequestSchema = z.object({
 export const reviewIssueSchema = z.object({
   title: z.string(),
   severity: z.enum(['critical', 'high', 'medium', 'low']),
-  category: z.enum(['hooks', 'architecture', 'render-loop', 'maintainability', 'performance']),
+  category: z.enum(['hooks', 'performance', 'architecture', 'maintainability', 'readability']),
   explanation: z.string(),
   suggestion: z.string(),
   lineHint: z.string().optional(),
@@ -20,6 +20,7 @@ export const reviewIssueSchema = z.object({
 export const refactorSuggestionSchema = z.object({
   title: z.string(),
   rationale: z.string(),
+  changes: z.string().optional(),
   example: z.string().optional(),
 })
 

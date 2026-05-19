@@ -25,9 +25,11 @@ hookguard-ai/
 ## Local Setup
 
 ```bash
-cd /home/moro/projects/personalProjects/hookguard-ai
+git clone https://github.com/Arrayo/hookguard-ai.git
+cd hookguard-ai
 cp backend/.env.example backend/.env
 ollama pull gemma3:4b
+npm install
 npm run dev
 ```
 

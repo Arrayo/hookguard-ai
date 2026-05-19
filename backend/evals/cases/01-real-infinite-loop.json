@@ -1,0 +1,22 @@
+{
+  "id": "01-real-infinite-loop",
+  "name": "state update depends on the same state",
+  "snippet": "01-real-infinite-loop.tsx",
+  "expectedCategory": "real infinite loops",
+  "expectedSeverity": "critical",
+  "expectedIssueCategory": "hooks",
+  "requiredKeywords": ["count", "setCount", "self-triggering"],
+  "forbiddenKeywords": ["harmless", "no issue"],
+  "forbiddenRefactorKeywords": [
+    "remove `count`",
+    "removed `count`",
+    "remove count",
+    "removed count",
+    "setCount(1)",
+    "setCount(count + 1); }, [])"
+  ],
+  "scoreRanges": {
+    "overall": { "max": 75 },
+    "hooks": { "max": 65 }
+  }
+}

@@ -3,7 +3,7 @@ export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low'
 export type ReviewIssue = {
   title: string
   severity: IssueSeverity
-  category: 'hooks' | 'architecture' | 'render-loop' | 'maintainability' | 'performance'
+  category: 'hooks' | 'performance' | 'architecture' | 'maintainability' | 'readability'
   explanation: string
   suggestion: string
   lineHint?: string | undefined
@@ -12,6 +12,7 @@ export type ReviewIssue = {
 export type RefactorSuggestion = {
   title: string
   rationale: string
+  changes?: string | undefined
   example?: string | undefined
 }
 
