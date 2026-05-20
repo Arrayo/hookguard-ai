@@ -1,6 +1,11 @@
+import { createHash } from 'node:crypto'
 import { Ollama } from 'ollama'
-import type { AiReviewerPort, ReactCodeReview } from '../../domain/codeReview.js'
+import type { AiReviewerPort, ReactCodeReview, StreamEvent } from '../../domain/codeReview.js'
 import { analyzeCodeResponseSchema } from '../../interfaces/http/schemas/reviewSchemas.js'
+import { buildAstFacts } from '../ast/reactHooksAnalyzer.js'
+
+const REVIEW_TIMEOUT_MS = 300_000
+const NUM_PREDICT = 1200
 
 const systemPrompt = `You are HookGuard AI: a pragmatic senior React production reviewer.
 
@@ -135,6 +140,7 @@ Bad issue style:
 
 export class OllamaReactReviewAdapter implements AiReviewerPort {
   private readonly client: Ollama
+  private readonly cache = new Map<string, ReactCodeReview>()
 
   constructor(
     private readonly model: string,
@@ -144,17 +150,93 @@ export class OllamaReactReviewAdapter implements AiReviewerPort {
   }
 
   async analyzeReactCode(code: string): Promise<ReactCodeReview> {
-    const codeFacts = buildCodeFacts(code)
+    const hash = codeHash(code)
+    const cached = this.cache.get(hash)
+    if (cached) {
+      console.debug('[HookGuard AI] Cache hit for code hash:', hash.slice(0, 8))
+      return cached
+    }
+
+    const review = await this.runWithTimeout(() => this.callOllama(code))
+    this.cache.set(hash, review)
+    return review
+  }
+
+  async analyzeReactCodeStream(
+    code: string,
+    onEvent: (event: StreamEvent) => void,
+  ): Promise<ReactCodeReview> {
+    const hash = codeHash(code)
+    const cached = this.cache.get(hash)
+    if (cached) {
+      console.debug('[HookGuard AI] Cache hit (stream) for hash:', hash.slice(0, 8))
+      return cached
+    }
+
+    const messages = buildMessages(code)
+    const stream = await this.client.chat({
+      model: this.model,
+      messages,
+      stream: true,
+      options: { temperature: 0, num_predict: NUM_PREDICT },
+    })
+
+    let fullText = ''
+    for await (const chunk of stream) {
+      const token = chunk.message.content
+      fullText += token
+      onEvent({ type: 'token', text: token })
+    }
+
+    console.debug('[HookGuard AI] Stream complete, parsing response')
+    const review = parseAiReviewResponse(fullText)
+    this.cache.set(hash, review)
+    return review
+  }
+
+  private async callOllama(code: string): Promise<ReactCodeReview> {
     const response = await this.client.chat({
       model: this.model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: `Review only the React code between <react_code> tags. Do not review examples or rules from the system prompt as if they were submitted code.
+      messages: buildMessages(code),
+      options: { temperature: 0, num_predict: NUM_PREDICT },
+    })
+
+    const content = response.message.content
+    console.debug('[HookGuard AI] Raw Ollama response:', content)
+    return parseAiReviewResponse(content)
+  }
+
+  private runWithTimeout<T>(fn: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(
+        () => reject(new Error('Ollama review timed out after 5 minutes')),
+        REVIEW_TIMEOUT_MS,
+      )
+      fn().then(
+        (result) => { clearTimeout(timer); resolve(result) },
+        (error: unknown) => { clearTimeout(timer); reject(error) },
+      )
+    })
+  }
+}
+
+function codeHash(code: string): string {
+  return createHash('sha256').update(code).digest('hex')
+}
+
+function buildMessages(code: string): Array<{ role: 'system' | 'user'; content: string }> {
+  const regexFacts = buildCodeFacts(code)
+  const astFacts = buildAstFacts(code)
+  const allFacts = astFacts ? `${astFacts}\n${regexFacts}` : regexFacts
+
+  return [
+    { role: 'system', content: systemPrompt },
+    {
+      role: 'user',
+      content: `Review only the React code between <react_code> tags. Do not review examples or rules from the system prompt as if they were submitted code.
 
 Facts about the submitted code, computed before review:
-${codeFacts}
+${allFacts}
 
 If a fact says a hook or pattern is absent, do not report issues that require that absent code.
 If recommendedPrimaryIssue is present, use it as the primary issue, including its severity and category, and do not replace it with a different classification.
@@ -165,19 +247,8 @@ Do not add style, className, title, or other JSX attributes in refactor examples
 <react_code>
 ${code}
 </react_code>`,
-        },
-      ],
-      options: {
-        temperature: 0,
-        num_predict: 700,
-      },
-    })
-
-    const content = response.message.content
-    console.debug('[HookGuard AI] Raw Ollama response:', content)
-
-    return parseAiReviewResponse(content)
-  }
+    },
+  ]
 }
 
 function buildCodeFacts(code: string): string {

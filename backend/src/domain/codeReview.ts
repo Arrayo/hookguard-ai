@@ -36,6 +36,14 @@ export type ReactCodeReview = {
   } | undefined
 }
 
+export type StreamEvent =
+  | { type: 'token'; text: string }
+  | { type: 'error'; message: string }
+
 export type AiReviewerPort = {
   analyzeReactCode(code: string): Promise<ReactCodeReview>
+  analyzeReactCodeStream(
+    code: string,
+    onEvent: (event: StreamEvent) => void,
+  ): Promise<ReactCodeReview>
 }

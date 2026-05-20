@@ -1,10 +1,10 @@
 import Editor from '@monaco-editor/react'
 import { AlertTriangle, Clipboard, ClipboardPaste, Loader2, Radar, Sparkles, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { analyzeReactCode } from '@/features/review/api'
+import { streamReactCode } from '@/features/review/api'
 import type { ReviewResponse } from '@/types/review'
 
 const demoExamples = [
@@ -97,6 +97,9 @@ function App() {
   const [review, setReview] = useState<ReviewResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [streamText, setStreamText] = useState('')
+  const abortRef = useRef<AbortController | null>(null)
+
   const activeDemo = demoExamples.find((example) => example.code === code)
   const filename = (() => {
     const match = code.match(/export\s+(?:default\s+)?function\s+([A-Z]\w+)/)
@@ -105,14 +108,27 @@ function App() {
   })()
 
   async function handleAnalyze() {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setError(null)
+    setReview(null)
+    setStreamText('')
     setIsLoading(true)
 
     try {
-      const result = await analyzeReactCode(code)
+      const result = await streamReactCode(
+        code,
+        (token) => setStreamText((prev) => prev + token),
+        controller.signal,
+      )
       setReview(result)
+      setStreamText('')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unexpected review failure.')
+      if ((caught as Error).name !== 'AbortError') {
+        setError(caught instanceof Error ? caught.message : 'Unexpected review failure.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -250,7 +266,7 @@ function App() {
               </Button>
             </CardHeader>
             <CardContent className="flex-1 pt-5">
-              {isLoading ? <LoadingState /> : null}
+              {isLoading ? <LoadingState streamText={streamText} /> : null}
               {error ? <ErrorState message={error} /> : null}
               {!isLoading && !error && review ? <ReviewPanels review={review} /> : null}
               {!isLoading && !error && !review ? <EmptyState /> : null}
@@ -459,9 +475,30 @@ function EmptyState() {
   )
 }
 
-function LoadingState() {
+function LoadingState({ streamText }: { streamText: string }) {
+  const hasStream = streamText.length > 0
+
+  if (hasStream) {
+    return (
+      <div className="flex h-full flex-col gap-3">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-cyan-400" />
+          <span>Generating review…</span>
+        </div>
+        <pre className="flex-1 overflow-auto rounded-xl border border-white/8 bg-slate-950/60 p-4 font-mono text-[11px] leading-relaxed text-slate-300 whitespace-pre-wrap break-words">
+          {streamText}
+          <span className="ml-0.5 inline-block h-3 w-0.5 animate-pulse bg-cyan-400" />
+        </pre>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-cyan-400" />
+        <span>Connecting to Ollama…</span>
+      </div>
       <div className="h-16 rounded-2xl border border-white/8 bg-white/[0.03] animate-shimmer" />
       <div className="flex gap-2">
         {[64, 76, 56].map((w) => (
