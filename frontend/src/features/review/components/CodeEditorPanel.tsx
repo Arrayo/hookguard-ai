@@ -3,6 +3,7 @@ import { Check, Clipboard, ClipboardPaste, Loader2, Radar, Trash2 } from 'lucide
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useCopyFeedback } from '@/hooks/useCopyFeedback'
+import { DEMO_MODE, getDemoKey } from '../api'
 import type { DemoExample } from '../demoExamples'
 
 type Props = {
@@ -136,17 +137,32 @@ type StatusBarProps = {
 }
 
 function EditorStatusBar({ lineCount, isLoading, code, onAnalyze }: StatusBarProps) {
+  const isDemoSnippet = !DEMO_MODE || getDemoKey(code) !== null
+  const isDisabled = isLoading || code.trim().length < 20 || !isDemoSnippet
+
   return (
     <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/70 px-4 py-2">
-      <p className="text-xs text-slate-500">{lineCount} lines</p>
-      <Button onClick={onAnalyze} disabled={isLoading || code.trim().length < 20}>
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Radar className="h-4 w-4" />
+      <div className="flex items-center gap-3">
+        <p className="text-xs text-slate-500">{lineCount} lines</p>
+        {DEMO_MODE && (
+          <span className="rounded border border-amber-300/25 bg-amber-300/8 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-300/80">
+            Demo
+          </span>
         )}
-        Analyze code
-      </Button>
+      </div>
+      <div className="flex flex-col items-end gap-1">
+        {DEMO_MODE && !isDemoSnippet && (
+          <p className="text-[10px] text-slate-500">Load an example to analyze</p>
+        )}
+        <Button onClick={onAnalyze} disabled={isDisabled} title={!isDemoSnippet ? 'Demo mode — select a built-in example' : undefined}>
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Radar className="h-4 w-4" />
+          )}
+          Analyze code
+        </Button>
+      </div>
     </div>
   )
 }

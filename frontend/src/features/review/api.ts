@@ -1,4 +1,8 @@
 import type { ReviewResponse } from '@/types/review'
+import { demoResponses } from './demoResponses'
+import { demoExamples } from './demoExamples'
+
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true'
 
 const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3333'
 
@@ -7,19 +11,9 @@ type SseEvent =
   | { type: 'done'; review: ReviewResponse }
   | { type: 'error'; message: string }
 
-export async function analyzeReactCode(code: string): Promise<ReviewResponse> {
-  const response = await fetch(`${apiUrl}/api/reviews/react`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  })
-
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as { message?: string } | null
-    throw new Error(payload?.message ?? 'The review request failed.')
-  }
-
-  return response.json() as Promise<ReviewResponse>
+export function getDemoKey(code: string): string | null {
+  const match = demoExamples.find((d) => d.code.trim() === code.trim())
+  return match?.short ?? null
 }
 
 export async function streamReactCode(
@@ -27,6 +21,10 @@ export async function streamReactCode(
   onToken: (text: string) => void,
   signal?: AbortSignal,
 ): Promise<ReviewResponse> {
+  if (DEMO_MODE) {
+    return streamDemoResponse(code, onToken, signal)
+  }
+
   const response = await fetch(`${apiUrl}/api/reviews/react/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -60,4 +58,32 @@ export async function streamReactCode(
   }
 
   throw new Error('Stream ended without a review result')
+}
+
+async function streamDemoResponse(
+  code: string,
+  onToken: (text: string) => void,
+  signal?: AbortSignal,
+): Promise<ReviewResponse> {
+  const key = getDemoKey(code)
+  const review = key ? demoResponses.get(key) : undefined
+
+  if (!review) {
+    throw new Error('Demo mode: only built-in examples can be analysed without a running backend.')
+  }
+
+  const text = JSON.stringify(review, null, 2)
+  const words = text.split(/(?<=\s)/)
+
+  for (const word of words) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+    onToken(word)
+    await delay(12)
+  }
+
+  return review
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
