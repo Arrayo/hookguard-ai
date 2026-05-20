@@ -22,14 +22,19 @@ hookguard-ai/
 - Ollama running locally
 - A Gemma model pulled in Ollama, for example `gemma3:4b`
 
-## Local Setup
+## Quick Start
+
+After the one-time setup below, you only need two separate terminals to run the full app locally.
+
+Terminal 1, keep Ollama running:
 
 ```bash
-git clone https://github.com/Arrayo/hookguard-ai.git
-cd hookguard-ai
-cp backend/.env.example backend/.env
-ollama pull gemma3:4b
-npm install
+ollama serve
+```
+
+Terminal 2, from the project root:
+
+```bash
 npm run dev
 ```
 
@@ -38,6 +43,25 @@ Frontend: `http://localhost:5173`
 Backend: `http://localhost:3333`
 
 Health check: `http://localhost:3333/health`
+
+Ollama: `http://127.0.0.1:11434`
+
+## Local Setup
+
+Run this once on a fresh clone so the quick-start commands above work without extra steps:
+
+```bash
+git clone https://github.com/Arrayo/hookguard-ai.git
+cd hookguard-ai
+cp backend/.env.example backend/.env
+ollama pull gemma3:4b
+npm install
+npm install --prefix backend
+npm install --prefix frontend
+npm run dev
+```
+
+If you already have the repository locally, start from `cd hookguard-ai` and skip the `git clone` step.
 
 ## Separate Commands
 

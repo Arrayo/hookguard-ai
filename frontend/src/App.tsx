@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clipboard } from 'lucide-react'
+import { Check, Clipboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CodeEditorPanel } from '@/features/review/components/CodeEditorPanel'
@@ -9,14 +9,21 @@ import { LoadingState } from '@/features/review/components/LoadingState'
 import { ReviewPanels } from '@/features/review/components/ReviewPanels'
 import { demoExamples, sampleCode } from '@/features/review/demoExamples'
 import { useReviewAnalysis } from '@/features/review/useReviewAnalysis'
+import { useCopyFeedback } from '@/hooks/useCopyFeedback'
 
 const reviewPillars = ['Hooks', 'Loops', 'Design']
 
 function App() {
   const [code, setCode] = useState(sampleCode)
   const { state, actions } = useReviewAnalysis(code, setCode)
+  const { copied: reviewCopied, copy: copyReview } = useCopyFeedback()
 
   const activeDemo = demoExamples.find((demo) => demo.code === code)
+
+  function handleCopyReview() {
+    if (!state.review) return
+    void copyReview(JSON.stringify(state.review, null, 2))
+  }
 
   return (
     <main className="min-h-screen px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
@@ -41,9 +48,15 @@ function App() {
                 <CardTitle>Review Results</CardTitle>
                 <p className="text-sm text-slate-400">Prioritized findings, fixes, and normalized scores</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={actions.copyReview} disabled={!state.review}>
-                <Clipboard className="h-4 w-4" />
-                Copy JSON
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyReview}
+                disabled={!state.review}
+                className={reviewCopied ? 'text-emerald-400' : ''}
+              >
+                {reviewCopied ? <Check className="h-4 w-4" /> : <Clipboard className="h-4 w-4" />}
+                {reviewCopied ? 'Copied!' : 'Copy JSON'}
               </Button>
             </CardHeader>
             <CardContent className="flex-1 pt-5">

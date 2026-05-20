@@ -1,7 +1,8 @@
-import { Clipboard } from 'lucide-react'
+import { Check, Clipboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { ReviewResponse } from '@/types/review'
+import { useCopyFeedback } from '@/hooks/useCopyFeedback'
 import { scoreEntries, scoreLabel, scoreTone } from '../scoreUtils'
 
 type Props = { review: ReviewResponse }
@@ -88,6 +89,8 @@ function RefactorList({ refactors }: { refactors: ReviewResponse['refactor'] }) 
 }
 
 function RefactorCard({ item }: { item: ReviewResponse['refactor'][number] }) {
+  const { copied, copy } = useCopyFeedback()
+
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-sm shadow-black/10">
       <div className="space-y-3 p-4">
@@ -100,10 +103,11 @@ function RefactorCard({ item }: { item: ReviewResponse['refactor'][number] }) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => void navigator.clipboard.writeText(item.example ?? '')}
+              className={copied ? 'text-emerald-400' : ''}
+              onClick={() => void copy(item.example ?? '')}
             >
-              <Clipboard className="h-4 w-4" />
-              Copy
+              {copied ? <Check className="h-4 w-4" /> : <Clipboard className="h-4 w-4" />}
+              {copied ? 'Copied!' : 'Copy'}
             </Button>
           ) : null}
         </div>
