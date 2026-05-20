@@ -13,7 +13,7 @@ export async function buildApp() {
   })
 
   const reviewer = new OllamaReactReviewAdapter(
-    process.env.OLLAMA_MODEL ?? 'gemma3:4b',
+    process.env.OLLAMA_MODEL ?? 'gemma4:e4b',
     process.env.OLLAMA_HOST,
   )
   const analyzeReactCode = new AnalyzeReactCodeUseCase(reviewer)

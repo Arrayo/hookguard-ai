@@ -39,7 +39,7 @@ HookGuard AI analyses React components for hook bugs, infinite loops, unstable d
 |-------|------------|
 | Frontend | React 19, Vite, TypeScript, TailwindCSS, Monaco Editor |
 | Backend | Fastify, TypeScript, Zod |
-| AI runtime | Ollama, Gemma 3 4B |
+| AI runtime | Ollama, Gemma 4 4B |
 | Code analysis | `@babel/parser` (AST), regex heuristics |
 | Transport | Server-Sent Events (SSE) streaming |
 | Quality | 10-case eval suite, ESLint, Prettier |
@@ -50,7 +50,7 @@ HookGuard AI analyses React components for hook bugs, infinite loops, unstable d
 
 - Node.js 20+
 - [Ollama](https://ollama.com) running locally
-- Gemma pulled: `ollama pull gemma3:4b`
+- Gemma pulled: `ollama pull gemma4:e4b`
 
 ---
 
@@ -62,7 +62,7 @@ One-time setup:
 git clone https://github.com/Arrayo/hookguard-ai.git
 cd hookguard-ai
 cp backend/.env.example backend/.env
-ollama pull gemma3:4b
+ollama pull gemma4:e4b
 npm install
 npm install --prefix backend
 npm install --prefix frontend
@@ -117,7 +117,7 @@ PORT=3333
 HOST=0.0.0.0
 FRONTEND_ORIGIN=http://localhost:5173
 OLLAMA_HOST=http://127.0.0.1:11434
-OLLAMA_MODEL=gemma3:4b
+OLLAMA_MODEL=gemma4:e4b
 ```
 
 Change `OLLAMA_MODEL` to any Gemma tag you have pulled locally.
