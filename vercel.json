@@ -1,8 +1,0 @@
-{
-  "buildCommand": "npm install --prefix frontend && npm run build --prefix frontend",
-  "outputDirectory": "frontend/dist",
-  "framework": null,
-  "env": {
-    "VITE_DEMO_MODE": "true"
-  }
-}

@@ -4,6 +4,8 @@
 
 HookGuard AI analyses React components for hook bugs, infinite loops, unstable dependencies, and architecture smells — all running on your machine with no cloud, no API keys, and no data leaving your computer.
 
+**[🔗 Live demo — hookguard-ai.vercel.app](https://hookguard-ai.vercel.app)** · No installation needed · Runs on prerecorded examples
+
 ---
 
 ## Screenshots
