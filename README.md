@@ -6,6 +6,8 @@ HookGuard AI analyses React components for hook bugs, infinite loops, unstable d
 
 **[🔗 Live demo — hookguard-ai.vercel.app](https://hookguard-ai.vercel.app)** · No installation needed · Runs on prerecorded examples
 
+**[▶️ Video walkthrough](https://youtu.be/YOUR_VIDEO_ID)** · 2 min demo
+
 ---
 
 ## Screenshots
