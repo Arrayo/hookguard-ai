@@ -2,7 +2,8 @@ import type { ReactCodeReview } from '../../domain/codeReview.js'
 import { analyzeCodeResponseSchema } from '../../interfaces/http/schemas/reviewSchemas.js'
 
 export function parseAiReviewResponse(rawAiResponse: string): ReactCodeReview {
-  const jsonText = extractJsonFromText(rawAiResponse)
+  const sanitized = sanitizeRawResponse(rawAiResponse)
+  const jsonText = extractJsonFromText(sanitized)
   console.debug('[HookGuard AI] Extracted JSON candidate:', jsonText)
 
   if (!jsonText) {
@@ -25,6 +26,13 @@ export function parseAiReviewResponse(rawAiResponse: string): ReactCodeReview {
 
   console.debug('[HookGuard AI] Response parsing succeeded.')
   return validated.data
+}
+
+function sanitizeRawResponse(content: string): string {
+  return content
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .trim()
 }
 
 export function extractJsonFromText(content: string): string | null {
@@ -71,6 +79,8 @@ function repairJson(jsonText: string): string {
     .replace(/```$/i, '')
     .replace(/[""]/g, '"')
     .replace(/['']/g, "'")
+    .replace(/\\`/g, '`')
+    .replace(/\\\$/g, '$')
     .replace(/\/\/.*$/gm, '')
     .replace(/,\s*([}\]])/g, '$1')
     .replace(/\\\s+([\[\]{}])/g, '$1')

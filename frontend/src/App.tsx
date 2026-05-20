@@ -30,7 +30,7 @@ function App() {
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <AppHeader pillars={reviewPillars} />
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] xl:items-stretch">
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] xl:items-start">
           <CodeEditorPanel
             code={code}
             isLoading={state.isLoading}
@@ -42,7 +42,7 @@ function App() {
             onPaste={() => void actions.paste()}
           />
 
-          <Card className="flex flex-col">
+          <Card className="flex flex-col xl:self-stretch">
             <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-white/10">
               <div>
                 <CardTitle>Review Results</CardTitle>
